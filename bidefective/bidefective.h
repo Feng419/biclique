@@ -34,7 +34,7 @@ public:
         std::vector<int> CU, std::vector<int> CV, 
         std::vector<int> XU, std::vector<int> XV, const int k, int t);
     void printdefective(const std::vector<int> &RU, const std::vector<int> &RV);
-    bool branch(const std::vector<int> RU, const std::vector<int> RV, int w,
+    void branch(const std::vector<int> RU, const std::vector<int> RV, int w,
         std::vector<int> CU, std::vector<int> CV, 
         std::vector<int> XU, std::vector<int> XV, int k, int t);
     std::vector<int> seterase(const std::vector<int> &S, const int w);
