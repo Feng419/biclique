@@ -21,11 +21,21 @@ void bidefective::run() {
             return g->deg1(u) > g->deg1(v);
         });
     }
-    for (int i : index) {
+    int indexsiz = index.size();
+    for (int i = 0; i < g->n1; ++i) {
+        int u = index[i];
         std::vector<int> RU;
-        RU.push_back(i);
-        defectiveEnum(RU, std::vector<int>(), seterase(twohopnei(i, 0), i), twohopset(g->nei[0][i], 1),
-            std::vector<int>(), std::vector<int>(), g->k, 0);
+        std::vector<int> CU, CV, XU;
+        std::vector<int> orderpre(index.begin() + i + 1, index.end()), orderpost(index.begin(), index.begin() + i);
+        RU.push_back(u);
+        CU = seterase(twohopnei(u, 0), u);
+        CV = twohopset(g->nei[0][u], 1);
+        if (ord == 1) {
+            CU = intersect(CU, orderpre);
+            XU = intersect(seterase(twohopnei(u, 0), u), orderpost);
+        }
+        //XU = intersect(seterase(twohopnei(u, 0), u), orderpost);
+        defectiveEnum(RU, std::vector<int>(), CU, CV, XU, std::vector<int>(), g->k, 0);
     }
     // defectiveEnum(std::vector<int>(), std::vector<int>(), CU, CV,
     //     std::vector<int>(), std::vector<int>(), g->k, 0);
@@ -316,8 +326,13 @@ void bidefective::defectiveEnum(const std::vector<int> RU, const std::vector<int
                     XU = setadd(XU, pu);
                 }
             } else {
+                if (!CU.empty()) {
+                    std::sort(CU.begin(), CU.end(), [=](int u, int v) -> bool {
+                        return nondeg(u, RV, t) == nondeg(v, RV, t) ? g->deg1(u) > g->deg1(v) : nondeg(u, RV, t) < nondeg(v, RV, t);
+                    });
+                }                
                 std::vector<int> delCU = updateC(CU, RV, pu, k - delk, t);
-                if (!delCU.empty()) printf("@@ %d\n", delCU.size());
+                //if (!delCU.empty()) printf("@@ %d\n", delCU.size());
                 std::vector<int> CU_(seterase(CU, delCU));
                 for (int w : CU_) {
                     if (k - nondeg(w, RV, t) >= 0 && in(w, CU)) {
