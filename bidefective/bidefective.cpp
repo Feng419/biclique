@@ -114,15 +114,10 @@ std::vector<int> bidefective::twohopset(const std::vector<int> &S, const int t) 
 }
 
 void bidefective::printdefective(const std::vector<int> &RU, const std::vector<int> &RV) {
-    printf("\nRU: ");
-    for (int ru : RU)
-        printf("%d, ", ru + g->n1);
-    printf("\n");
-
-    printf("RV: ");
-    for (int rv : RV)
-        printf("%d, ", rv);
-    printf("\n");
+    printf("R_l:");
+    for(int u : RU) printf("%d ", u);printf("\n");
+    printf("R_r:");
+    for(int u : RV) printf("%d ", u);printf("\n");
 }
 
 int bidefective::findpivot(const std::vector<int> CU, const std::vector<int> RV, const std::vector<int> XU, int t) {
@@ -315,9 +310,9 @@ void bidefective::defectiveEnum(const std::vector<int> RU, const std::vector<int
         }
     } else if (piv == 3) {
         pu = findpivotv2(CU, RV, t);
+        int delk = pu == -1 ? -1 : nondeg(pu, RV, t);
         //pv = findpivotv2(CV, RU, 1 - t);
         if (pu != -1) {
-            int delk = nondeg(pu, RV, t);
             // printf("delk: %d\n", delk);
             if (delk == 0) {
                 if (k - nondeg(pu, RV, t) >= 0 && in(pu, CU)) {
@@ -326,11 +321,11 @@ void bidefective::defectiveEnum(const std::vector<int> RU, const std::vector<int
                     XU = setadd(XU, pu);
                 }
             } else {
-                if (!CU.empty()) {
-                    std::sort(CU.begin(), CU.end(), [=](int u, int v) -> bool {
-                        return nondeg(u, RV, t) == nondeg(v, RV, t) ? g->deg1(u) > g->deg1(v) : nondeg(u, RV, t) < nondeg(v, RV, t);
-                    });
-                }                
+                // if (!CU.empty()) {
+                //     std::sort(CU.begin(), CU.end(), [=](int u, int v) -> bool {
+                //         return nondeg(u, RV, t) == nondeg(v, RV, t) ? g->deg1(u) > g->deg1(v) : nondeg(u, RV, t) < nondeg(v, RV, t);
+                //     });
+                // }                
                 std::vector<int> delCU = updateC(CU, RV, pu, k - delk, t);
                 //if (!delCU.empty()) printf("@@ %d\n", delCU.size());
                 std::vector<int> CU_(seterase(CU, delCU));
@@ -353,7 +348,7 @@ void bidefective::defectiveEnum(const std::vector<int> RU, const std::vector<int
             }
         }
         std::vector<int> CV_(CV);
-        //if (pu != -1) CV_ = seterase(CV_, g->nei[t][pu]);
+        if (pu != -1 && !delk) CV_ = seterase(CV_, g->nei[t][pu]);
         for (int w : CV_) {
             if (k - nondeg(w, RU, 1 - t) >= 0 && in(w, CV)) {
                 branch(RV, RU, w, seterase(CV, w), CU, XV, XU, k - nondeg(w, RU, 1 - t), 1 - t);
