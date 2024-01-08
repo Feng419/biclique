@@ -8,6 +8,7 @@
 #include "fastIO.hpp"
 #include "filesystem.hpp"
 #include "listlinearheap.hpp"
+#include "../tools/hash.hpp"
 
 const int N = 10000;
 
@@ -21,6 +22,7 @@ struct biGraph {
     std::vector<int> pU, pV, e1, e2;
     std::vector<int> p[2], e[2];
     std::vector<int> cores[2];
+    std::vector<CuckooHash> cuhash[2];
     std::vector<int> old_lables[2];
 
     std::vector<std::vector<int> > nei[2]; 
@@ -28,6 +30,17 @@ struct biGraph {
 
     biGraph(const std::string & filepath, const std::string & core) {
         read(filepath, core);
+
+        cuhash[0].resize(n[0]);
+        cuhash[1].resize(n[1]);
+        for(uint32_t t = 0; t <= 1; t++) {
+            for(uint32_t i = 0; i < n[t]; i++) {
+                uint32_t d = p[t][i + 1] - p[t][i];
+                cuhash[t][i].reserve(d+1);
+                for (uint32_t j = p[t][i]; j < p[t][i + 1];++j)
+                    cuhash[t][i].insert(e[t][j]);
+            }
+        }
     }
 
     void read(const std::string & filepath, const std::string & core) {
@@ -522,6 +535,10 @@ struct biGraph {
     std::vector<int> returnnei(int u, int t) {
         std::vector<int> s(e[t].begin() + p[t][u], e[t].begin() + p[t][u + 1]);
         return s;
+    }
+
+    bool connect(uint32_t u, uint32_t v, uint32_t t) {
+        return cuhash[t][u].find(v);
     }
 };
 
